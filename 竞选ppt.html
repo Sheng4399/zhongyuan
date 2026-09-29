@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>李跃晟 · 竞选心理委员</title>
+<style>
+/* ==================== 基础变量 ==================== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cyan:#22e1ff;
+  --pink:#ff2d78;
+  --violet:#8b5cf6;
+  --text:#e9eefb;
+  --muted:#8a95ad;
+  --line:rgba(120,160,255,.16);
+  --mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+}
+html,body{height:100%;overflow:hidden;background:#04050a}
+body{
+  color:var(--text);
+  font-family:"HarmonyOS Sans SC","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ==================== 背景层 ==================== */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-grid{
+  position:absolute;inset:-20%;
+  background-image:
+    linear-gradient(rgba(60,140,255,.075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60,140,255,.075) 1px, transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse 70% 65% at 50% 45%, #000 25%, transparent 78%);
+  mask-image:radial-gradient(ellipse 70% 65% at 50% 45%, #000 25%, transparent 78%);
+  animation:gridDrift 26s linear infinite;
+}
+@keyframes gridDrift{to{background-position:64px 64px, 64px 64px}}
+
+.bg-glow{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(620px 420px at 12% 8%, rgba(34,225,255,.14), transparent 62%),
+    radial-gradient(720px 520px at 88% 92%, rgba(255,45,120,.12), transparent 62%),
+    radial-gradient(900px 640px at 52% 50%, rgba(139,92,246,.10), transparent 72%);
+}
+
+.sweep{
+  position:absolute;left:-10%;right:-10%;height:200px;
+  background:linear-gradient(to bottom, transparent, rgba(34,225,255,.06), transparent);
+  animation:sweepMove 11s linear infinite;
+}
+@keyframes sweepMove{0%{top:-25%}100%{top:125%}}
+
+.bg-scan{
+  position:absolute;inset:0;opacity:.55;
+  background:repeating-linear-gradient(to bottom, rgba(255,255,255,.022) 0 1px, transparent 1px 4px);
+}
+.vignette{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,.72) 100%);
+}
+
+/* ==================== HUD ==================== */
+.hud{
+  position:fixed;top:0;left:0;right:0;height:58px;z-index:20;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(18px,4vw,54px);
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;
+  color:rgba(150,168,198,.8);pointer-events:none;text-transform:uppercase;
+}
+.hud .sep{color:rgba(120,150,200,.4);margin:0 4px}
+.hud b{color:var(--cyan);font-weight:600}
+.hud .brand::before{
+  content:"";display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--cyan);margin-right:10px;vertical-align:middle;
+  box-shadow:0 0 10px var(--cyan);animation:pulseDot 2s ease-in-out infinite;
+}
+@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+
+/* ==================== 幻灯片容器 ==================== */
+.deck{position:fixed;inset:0;z-index:10}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  padding:clamp(72px,9vh,106px) clamp(22px,7vw,132px) clamp(74px,9vh,100px);
+  overflow-y:auto;overflow-x:hidden;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transform:translateY(30px) scale(.988);
+  transition:opacity .5s ease, transform .65s cubic-bezier(.2,.8,.2,1), visibility .5s;
+  scrollbar-width:none;
+}
+.slide::-webkit-scrollbar{display:none}
+.slide.active{opacity:1;visibility:visible;pointer-events:auto;transform:none;z-index:2}
+.slide > .inner{margin:auto 0;width:100%;max-width:1180px;align-self:center}
+
+/* ==================== 排版 ==================== */
+.kicker{
+  display:flex;align-items:center;gap:14px;
+  font-family:var(--mono);font-size:clamp(10.5px,1vw,13px);
+  letter-spacing:.28em;text-transform:uppercase;color:var(--cyan);
+  margin-bottom:clamp(14px,2.2vh,24px);opacity:.92;
+}
+.kicker::before{
+  content:"";width:34px;height:1px;flex:none;
+  background:linear-gradient(90deg,transparent,var(--cyan));
+  box-shadow:0 0 8px var(--cyan);
+}
+
+h1{
+  font-size:clamp(52px,9vw,132px);
+  font-weight:800;line-height:1;letter-spacing:-.03em;
+}
+h2{
+  font-size:clamp(26px,4.1vw,50px);
+  font-weight:800;line-height:1.22;letter-spacing:-.015em;
+}
+h1 em,h2 em{font-style:normal;color:var(--cyan);text-shadow:0 0 26px rgba(34,225,255,.55)}
+
+.grad-text{
+  background:linear-gradient(100deg,#f2f7ff 0%,#8ff0ff 34%,#a78bfa 64%,#ff6fa5 100%);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+}
+
+.lead{
+  font-size:clamp(14.5px,1.7vw,21px);
+  line-height:1.85;color:#a8b3c9;
+  margin-top:clamp(14px,2.4vh,28px);
+  max-width:62ch;
+}
+.lead.strong{color:#e2e9f8}
+
+.tiny{
+  font-family:var(--mono);font-size:clamp(10.5px,1vw,13.5px);
+  letter-spacing:.32em;color:var(--muted);text-transform:uppercase;
+  margin-bottom:14px;
+}
+.big{
+  font-size:clamp(38px,6.6vw,96px);
+  font-weight:800;line-height:1.08;letter-spacing:-.02em;
+}
+
+/* ==================== 组件 ==================== */
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:clamp(18px,3.2vh,36px)}
+.chip{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 16px;border-radius:999px;
+  border:1px solid rgba(34,225,255,.28);
+  background:rgba(34,225,255,.055);
+  font-family:var(--mono);font-size:clamp(11px,1.02vw,13.5px);
+  letter-spacing:.05em;color:#9fe9ff;white-space:nowrap;
+}
+
+.grid{display:grid;gap:clamp(11px,1.3vw,18px);margin-top:clamp(18px,3vh,36px)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+
+.card{
+  position:relative;overflow:hidden;
+  padding:clamp(16px,2vw,28px);
+  border:1px solid var(--line);border-radius:14px;
+  background:linear-gradient(160deg, rgba(26,36,64,.72), rgba(8,11,22,.55));
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:transform .38s cubic-bezier(.2,.8,.2,1), border-color .38s, box-shadow .38s;
+}
+.card::before{
+  content:"";position:absolute;top:0;left:0;width:34px;height:34px;
+  border-top:2px solid var(--cyan);border-left:2px solid var(--cyan);
+  opacity:.65;border-radius:14px 0 0 0;
+}
+.card::after{
+  content:"";position:absolute;right:0;bottom:0;width:34px;height:34px;
+  border-bottom:2px solid var(--pink);border-right:2px solid var(--pink);
+  opacity:.5;border-radius:0 0 14px 0;
+}
+.card:hover{
+  transform:translateY(-5px);
+  border-color:rgba(34,225,255,.45);
+  box-shadow:0 16px 46px -18px rgba(34,225,255,.55);
+}
+.card h3{
+  display:flex;align-items:center;gap:10px;
+  font-size:clamp(15px,1.5vw,20px);font-weight:700;
+  margin-bottom:10px;letter-spacing:.01em;
+}
+.card .num{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  color:var(--cyan);opacity:.85;letter-spacing:.1em;
+}
+.card p{
+  font-size:clamp(12.5px,1.12vw,15.5px);
+  line-height:1.78;color:#98a4be;
+}
+
+.quote{
+  margin-top:clamp(18px,3vh,34px);
+  padding:4px 0 4px 22px;
+  border-left:2px solid var(--cyan);
+  font-size:clamp(16px,2vw,26px);
+  line-height:1.62;color:#dfe7f8;font-weight:500;
+  box-shadow:-1px 0 22px -6px rgba(34,225,255,.6);
+}
+
+.hint{
+  margin-top:clamp(26px,5vh,56px);
+  font-family:var(--mono);font-size:12.5px;
+  letter-spacing:.14em;color:var(--muted);
+}
+.caret{color:var(--cyan);animation:blink 1.05s steps(1) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* ==================== 故障字效 ==================== */
+.glitch{position:relative;display:inline-block}
+.glitch::before,
+.glitch::after{
+  content:attr(data-text);
+  position:absolute;left:0;top:0;width:100%;
+  color:var(--cyan);background:none;
+  -webkit-background-clip:border-box;background-clip:border-box;
+  pointer-events:none;opacity:0;mix-blend-mode:screen;
+}
+.glitch::before{clip-path:inset(0 0 58% 0);animation:glitchA 6s infinite steps(1)}
+.glitch::after{clip-path:inset(58% 0 0 0);color:var(--pink);animation:glitchB 6s infinite steps(1)}
+@keyframes glitchA{
+  0%,90%,100%{opacity:0;transform:translate(0)}
+  91%{opacity:.75;transform:translate(-3px,1px)}
+  94%{opacity:.45;transform:translate(3px,-2px)}
+  97%{opacity:.65;transform:translate(-2px,2px)}
+}
+@keyframes glitchB{
+  0%,90%,100%{opacity:0;transform:translate(0)}
+  92%{opacity:.6;transform:translate(3px,-1px)}
+  95%{opacity:.4;transform:translate(-3px,2px)}
+  98%{opacity:.5;transform:translate(2px,1px)}
+}
+
+/* ==================== 入场动画 ==================== */
+@keyframes riseIn{
+  from{opacity:0;transform:translateY(26px);filter:blur(6px)}
+  to{opacity:1;transform:translateY(0);filter:blur(0)}
+}
+.slide.active .reveal{
+  animation:riseIn .78s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay:var(--d,0s);
+}
+
+/* ==================== 底部控件 ==================== */
+.dots{
+  position:fixed;left:clamp(18px,4vw,54px);bottom:clamp(18px,3.4vw,36px);
+  display:flex;align-items:center;gap:8px;z-index:22;
+}
+.dot{
+  width:7px;height:7px;padding:0;border:0;border-radius:50%;
+  background:rgba(140,165,210,.28);cursor:pointer;
+  transition:all .35s cubic-bezier(.2,.8,.2,1);
+}
+.dot:hover{background:rgba(140,165,210,.6)}
+.dot.on{
+  width:22px;border-radius:4px;background:var(--cyan);
+  box-shadow:0 0 12px rgba(34,225,255,.9);
+}
+
+.nav{
+  position:fixed;right:clamp(18px,4vw,54px);bottom:clamp(14px,3vw,30px);
+  display:flex;gap:10px;z-index:22;
+}
+.nav button{
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid rgba(120,160,255,.25);
+  background:rgba(10,16,30,.6);
+  color:#cfe0ff;font-size:20px;line-height:1;cursor:pointer;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:all .3s cubic-bezier(.2,.8,.2,1);
+}
+.nav button:hover{
+  border-color:var(--cyan);color:var(--cyan);
+  box-shadow:0 0 22px -4px rgba(34,225,255,.75);
+  transform:translateY(-2px);
+}
+.nav button:active{transform:scale(.94)}
+
+.progress{
+  position:fixed;left:0;right:0;bottom:0;height:2px;z-index:22;
+  background:rgba(120,160,255,.12);
+}
+.progress i{
+  display:block;height:100%;width:10%;
+  background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));
+  box-shadow:0 0 14px rgba(34,225,255,.8);
+  transition:width .55s cubic-bezier(.2,.8,.2,1);
+}
+
+/* ==================== 响应式 ==================== */
+@media (max-width:900px){
+  .grid-3{grid-template-columns:1fr 1fr}
+}
+@media (max-width:700px){
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .slide{padding:76px 20px 96px}
+  .hud{font-size:10px;height:48px}
+  .quote{font-size:16px;padding-left:16px}
+  .nav button{width:38px;height:38px;font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== 背景 ==================== -->
+<div class="bg">
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <div class="sweep"></div>
+  <div class="bg-scan"></div>
+  <div class="vignette"></div>
+</div>
+
+<!-- ==================== 顶部 HUD ==================== -->
+<header class="hud">
+  <span class="brand">LI YUESHENG <span class="sep">/</span> 竞选演讲</span>
+  <span><b id="curNum">01</b><span class="sep">/</span>10</span>
+</header>
+
+<!-- ==================== 幻灯片 ==================== -->
+<main class="deck" id="deck">
+
+  <!-- 01 封面 -->
+  <section class="slide active">
+    <div class="inner">
+      <div class="kicker reveal" style="--d:.05s">Candidacy · 竞选演讲</div>
+      <h1 class="glitch grad-text reveal" data-text="李跃晟" style="--d:.14s">李跃晟</h1>
+      <p class="lead reveal" style="--d:.28s">
+        中原科技学院 · 机电工程学院<br>
+        机械设计制造及其自动化 · 大一
+      </p>
+      <div class="chips reveal" style="--d:.42s">
+        <span class="chip">AI 应用实践</span>
+        <span class="chip">PR / AE / 剪映</span>
+        <span class="chip">SolidWorks 学习中</span>
+      </div>
+      <div class="hint reveal" style="--d:.62s">按 → / 空格 / 点击任意处 继续<span class="caret">_</span></div>
+    </div>
+  </section>
+
+  <!-- 02 关于我 -->
+  <section class="slide">
+    <div class="inner">
+      <div class="kicker reveal">01 / About Me</div>
+      <h2 class="grad-text reveal" style="--d:.08s">先介绍一下我自己</h2>
+      <p class="lead reveal" style="--d:.17s">一个大一新生，习惯把脑子里的想法，快速变成能打开、能玩、能看见的东西。</p>
+      <div class="grid grid-3 reveal" style="--d:.28s">
+        <div class="card">
+          <h3><span class="num">01</span>AI 创造</h3>
+          <p>能用 AI 制作个人网站、PPT、歌曲、小游戏——点子当天就能落地，不必等"以后再说"。</p>
+        </div>
+        <div class="card">
+          <h3><span class="num">02</span>影像叙事</h3>
+          <p>熟练使用 PR / AE / 剪映，会剪片子、做动效。我知道怎么把一件事讲得让人愿意看下去。</p>
+        </div>
+        <div class="card">
+          <h3><span class="num">03</span>机械建模</h3>
+          <p>正在学习 SolidWorks 等机械建模软件。工科的思维方式：结构、精度、可执行。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 第一个决定 -->
+  <section class="slide">
+    <div class="inner">
+      <div class="kicker reveal">02 / The First Decision</div>
+      <h2 class="reveal" style="--d:.08s">我的第一个决定，<br>是<em>放弃</em>。</h2>
+      <p class="lead reveal" style="--d:.2s">
+        在竞选开始之前，我原本准备竞选的位置是——团支部书记。<br>
+        我做了准备，也想站上去。
+      </p>
+      <p class="lead strong reveal" style="--d:.32s">但我最终，没有站上去。</p>
+    </div>
+  </section>
+
+  <!-- 04 那个身影 -->
+  <section class="slide">
+    <div class="inner">
+      <div class="kicker reveal">03 / The Person I Saw</div>
+      <h2 class="grad-text reveal" style="--d:.08s">因为在那之前，<br>我先看见了张志旺同学</h2>
+      <div class="grid grid-2 reveal" style="--d:.2s">
+        <div class="card">
+          <h3><span class="num">01</span>竞选开始之前</h3>
+          <p>他主动帮同学转接团组织关系。那不是他的任务，也没有任何人要求他这么做。</p>
+        </div>
+        <div class="card">
+          <h3><span class="num">02</span>日常生活之中</h3>
+          <p>他处处帮助同学。不是一次性的表现，而是长期的、稳定的、不需要被看见的付出。</p>
+        </div>
+      </div>
+      <div class="quote reveal" style="--d:.36s">
+        他没有拉票，也没有站在聚光灯下。<br>他只是在做。
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 我的判断 -->
+  <section class="slide">
+    <div class="inner">
+      <div class="kicker reveal">04 / My Judgement</div>
+      <h2 class="reveal" style="--d:.08s">真心为同学服务的<em>心灵</em>，<br>远强于学习能力的优劣。</h2>
+      <div class="grid grid-2 reveal" style="--d:.22s">
+        <div class="card">
+          <h3><span class="num">A</span>能力可以被衡量</h3>
+          <p>成绩、技能、经验，这些都能被量化，也能在时间里慢慢追赶。</p>
+        </div>
+        <div class="card">
+          <h3><span class="num">B</span>心意无法被替代</h3>
+          <p>一个人是否愿意把别人的事当成自己的事——这件事，学不来，也装不久。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 我的选择 -->
+  <section class="slide">
+    <div class="inner">
+      <div class="kicker reveal">05 / Why I Step Aside</div>
+      <h2 class="grad-text reveal" style="--d:.08s">他极其出色，<br>也极其适配这个岗位</h2>
+      <p class="lead strong reveal" style="--d:.2s">
+        我不想他失去一个可以尽情发挥自己能力的平台。<br>
+        所以我选择放弃团支部书记的竞选。
+      </p>
+      <div class="chips reveal" style="--d:.36s">
+        <span class="chip">不是退让</span>
+        <span class="chip">不是认输</span>
+        <span class="chip">是更准确的判断</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 转向 -->
+  <section class="slide">
+    <div class="inner">
+      <div class="kicker reveal">06 / A New Position</div>
+      <h2 class="reveal" style="--d:.08s">我把那个位置让出去，<br>把力气用在更适合我的地方。</h2>
+      <div class="reveal" style="--d:.26s;margin-top:clamp(24px,4.5vh,52px)">
+        <p class="tiny">所以今天，我站在这里竞选</p>
+        <div class="big grad-text glitch" data-text="心理委员">心理委员</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 为什么是我 -->
+  <section class="slide">
+    <div class="inner">
+      <div class="kicker reveal">07 / Why Me</div>
+      <h2 class="reveal" style="--d:.08s">心理委员需要什么，<br>我恰好有什么</h2>
+      <div class="grid grid-2 reveal" style="--d:.2s">
+        <div class="card">
+          <h3><span class="num">01</span>倾听的耐心</h3>
+          <p>做内容这几年，我最熟悉的动作是"听懂对方真正想说什么"，而不是急着表达自己。</p>
+        </div>
+        <div class="card">
+          <h3><span class="num">02</span>表达的创意</h3>
+          <p>会做小游戏、会写歌、会做网站。我可以让心理健康活动不无聊、不形式，真的有人愿意来。</p>
+        </div>
+        <div class="card">
+          <h3><span class="num">03</span>技术的工具</h3>
+          <p>我能给班级做匿名树洞、心理小站、情绪记录小工具，让"想说话"这件事变得更容易。</p>
+        </div>
+        <div class="card">
+          <h3><span class="num">04</span>工科的可靠</h3>
+          <p>机械设计讲的是精度与可靠，做人也是：答应的事，就做到。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 承诺 -->
+  <section class="slide">
+    <div class="inner">
+      <div class="kicker reveal">08 / My Promise</div>
+      <h2 class="reveal" style="--d:.08s">我不敢说自己是最会说话的人，<br>但我愿意做那个<em>愿意听</em>的人。</h2>
+      <div class="grid grid-3 reveal" style="--d:.22s">
+        <div class="card">
+          <h3><span class="num">01</span>保密</h3>
+          <p>你说的每一句话，都留在你和我之间。</p>
+        </div>
+        <div class="card">
+          <h3><span class="num">02</span>在场</h3>
+          <p>你需要的时候，我在；你不需要的时候，我不打扰。</p>
+        </div>
+        <div class="card">
+          <h3><span class="num">03</span>行动</h3>
+          <p>不做形式主义的活动，只做真的有用的东西。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 结尾 -->
+  <section class="slide">
+    <div class="inner">
+      <div class="kicker reveal">09 / End</div>
+      <div class="big grad-text glitch reveal" data-text="李跃晟" style="--d:.1s">李跃晟</div>
+      <p class="lead strong reveal" style="--d:.24s">竞选 · 心理委员</p>
+      <p class="tiny reveal" style="--d:.38s;margin-top:22px">机电工程学院 · 机械设计制造及其自动化</p>
+      <div class="hint reveal" style="--d:.55s">THANKS FOR LISTENING<span class="caret">_</span></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ==================== 控件 ==================== -->
+<div class="dots" id="dots"></div>
+<div class="nav">
+  <button id="prev" aria-label="上一页">‹</button>
+  <button id="next" aria-label="下一页">›</button>
+</div>
+<div class="progress"><i id="progressBar"></i></div>
+
+<script>
+(function () {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let cur = 0;
+
+  /* ---- 生成导航圆点 ---- */
+  const dotsBox = document.getElementById('dots');
+  slides.forEach(function (_, i) {
+    const b = document.createElement('button');
+    b.className = 'dot' + (i === 0 ? ' on' : '');
+    b.setAttribute('aria-label', '第 ' + (i + 1) + ' 页');
+    b.addEventListener('click', function () { go(i); });
+    dotsBox.appendChild(b);
+  });
+  const dots = Array.from(dotsBox.children);
+
+  const curEl = document.getElementById('curNum');
+  const progEl = document.getElementById('progressBar');
+
+  function render() {
+    curEl.textContent = String(cur + 1).padStart(2, '0');
+    progEl.style.width = ((cur + 1) / total * 100) + '%';
+    dots.forEach(function (d, i) { d.classList.toggle('on', i === cur); });
+  }
+
+  function go(n) {
+    n = Math.max(0, Math.min(total - 1, n));
+    if (n === cur) return;
+    slides[cur].classList.remove('active');
+    cur = n;
+    slides[cur].classList.add('active');
+    slides[cur].scrollTop = 0;
+    render();
+  }
+
+  /* ---- 键盘 ---- */
+  document.addEventListener('keydown', function (e) {
+    const k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ' || k === 'Enter') {
+      e.preventDefault(); go(cur + 1);
+    } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') {
+      e.preventDefault(); go(cur - 1);
+    } else if (k === 'Home') {
+      e.preventDefault(); go(0);
+    } else if (k === 'End') {
+      e.preventDefault(); go(total - 1);
+    }
+  });
+
+  /* ---- 滚轮（带节流） ---- */
+  let wheelLock = false;
+  window.addEventListener('wheel', function (e) {
+    if (wheelLock) return;
+    if (Math.abs(e.deltaY) < 18) return;
+    wheelLock = true;
+    setTimeout(function () { wheelLock = false; }, 780);
+    go(cur + (e.deltaY > 0 ? 1 : -1));
+  }, { passive: true });
+
+  /* ---- 触摸滑动 ---- */
+  let tX = 0, tY = 0;
+  window.addEventListener('touchstart', function (e) {
+    tX = e.touches[0].clientX;
+    tY = e.touches[0].clientY;
+  }, { passive: true });
+  window.addEventListener('touchend', function (e) {
+    const dx = e.changedTouches[0].clientX - tX;
+    const dy = e.changedTouches[0].clientY - tY;
+    if (Math.abs(dy) > 60 && Math.abs(dy) > Math.abs(dx)) go(cur + (dy < 0 ? 1 : -1));
+    else if (Math.abs(dx) > 80) go(cur + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  /* ---- 点击空白处前进 ---- */
+  document.getElementById('deck').addEventListener('click', function (e) {
+    if (e.target.closest('button, a, .card')) return;
+    go(cur + 1);
+  });
+
+  /* ---- 左右按钮 ---- */
+  document.getElementById('prev').addEventListener('click', function (e) {
+    e.stopPropagation(); go(cur - 1);
+  });
+  document.getElementById('next').addEventListener('click', function (e) {
+    e.stopPropagation(); go(cur + 1);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
